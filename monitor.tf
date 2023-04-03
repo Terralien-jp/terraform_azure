@@ -50,6 +50,33 @@ resource "azurerm_monitor_metric_alert" "sql_memory_alert" {
   }
 }
 
+resource "azurerm_monitor_metric_alert" "sql_cpu_alert" {
+  name                = "sql-cpu-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_sql_database.example.id]
+  description         = "This alert will trigger when the CPU usage percentage is greater than a certain threshold."
+
+  criteria {
+    metric_namespace = "Microsoft.Sql/servers/databases"
+    metric_name      = "cpu_percent" # CPU使用率のメトリック
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80 # 閾値を設定します（この例では80%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
+    dimension {
+      name     = "DatabaseName"
+      operator = "Include"
+      values   = ["example-sql-database"]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
+
 # redisのアラートルールを作成するためのコード
 
 resource "azurerm_monitor_metric_alert" "redis_cpu_alert" {
