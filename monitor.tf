@@ -104,3 +104,29 @@ resource "azurerm_monitor_metric_alert" "redis_cpu_alert" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+resource "azurerm_monitor_metric_alert" "redis_memory_alert" {
+  name                = "redis-memory-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_redis_cache.example.id]
+  description         = "This alert will trigger when the memory usage percentage is greater than a certain threshold."
+
+  criteria {
+    metric_namespace = "Microsoft.Cache/Redis"
+    metric_name      = "used_memory_percentage" # メモリ使用率のメトリック
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 90 # 閾値を設定します（この例では90%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
+    dimension {
+      name     = "CacheName"
+      operator = "Include"
+      values   = ["example-redis-cache"]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
