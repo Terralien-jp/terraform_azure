@@ -50,6 +50,7 @@ resource "azurerm_monitor_metric_alert" "sql_memory_alert" {
   }
 }
 
+# SQL DB CPU使用率を監視するためのコード
 resource "azurerm_monitor_metric_alert" "sql_cpu_alert" {
   name                = "sql-cpu-alert"
   resource_group_name = azurerm_resource_group.example.name
@@ -76,6 +77,59 @@ resource "azurerm_monitor_metric_alert" "sql_cpu_alert" {
   }
 }
 
+# SQL DB DTU使用率を監視するためのコード
+resource "azurerm_monitor_metric_alert" "sql_dtu_alert" {
+  name                = "sql-dtu-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_sql_database.example.id]
+  description         = "This alert will trigger when the DTU usage percentage is greater than a certain threshold."
+
+  criteria {
+    metric_namespace = "Microsoft.Sql/servers/databases"
+    metric_name      = "dtu_consumption_percent" # DTU使用率のメトリック
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80 # 閾値を設定します（この例では80%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
+    dimension {
+      name     = "DatabaseName"
+      operator = "Include"
+      values   = ["example-sql-database"]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
+# SQL DB ディスク使用率を監視するためのコード
+resource "azurerm_monitor_metric_alert" "sql_disk_usage_alert" {
+  name                = "sql-disk-usage-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_sql_database.example.id]
+  description         = "This alert will trigger when the disk usage percentage is greater than a certain threshold."
+
+  criteria {
+    metric_namespace = "Microsoft.Sql/servers/databases"
+    metric_name      = "storage_percent" # ディスク使用率のメトリック
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 90 # 閾値を設定します（この例では90%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
+    dimension {
+      name     = "DatabaseName"
+      operator = "Include"
+      values   = ["example-sql-database"]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
 
 # redisのアラートルールを作成するためのコード
 
