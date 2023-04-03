@@ -12,14 +12,14 @@ resource "azurerm_log_analytics_workspace" "example" {
 }
 
 # ログ分析クエリを作成するためのコード
-resource "azurerm_monitor_log_query" "example" {
-  name                = "example-log-query"
-  workspace_id        = azurerm_log_analytics_workspace.example.id
-  query               = "AzureDiagnostics | where Category == 'SQLSecurityAuditEvents' and audit_event_type_s == 'SQL_BATCH_COMPLETED' | project TimeGenerated, server_instance_name_s, database_name_s, client_ip_s, application_name_s, command_s, username_s | sort by TimeGenerated desc | limit 10"
-  query_type          = "Result"
-  result_format       = "Table"
-  workspace_name      = azurerm_log_analytics_workspace.example.name
-}
+# resource "azurerm_monitor_log_query" "example" {
+#   name                = "example-log-query"
+#   workspace_id        = azurerm_log_analytics_workspace.example.id
+#   query               = "AzureDiagnostics | where Category == 'SQLSecurityAuditEvents' and audit_event_type_s == 'SQL_BATCH_COMPLETED' | project TimeGenerated, server_instance_name_s, database_name_s, client_ip_s, application_name_s, command_s, username_s | sort by TimeGenerated desc | limit 10"
+#   query_type          = "Result"
+#   result_format       = "Table"
+#   workspace_name      = azurerm_log_analytics_workspace.example.name
+# }
 
 # アクショングループを作成するためのコード
 resource "azurerm_monitor_action_group" "example" {
