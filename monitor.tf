@@ -11,16 +11,6 @@ resource "azurerm_log_analytics_workspace" "example" {
   sku                 = "PerGB2018"
 }
 
-# ログ分析クエリを作成するためのコード
-# resource "azurerm_monitor_log_query" "example" {
-#   name                = "example-log-query"
-#   workspace_id        = azurerm_log_analytics_workspace.example.id
-#   query               = "AzureDiagnostics | where Category == 'SQLSecurityAuditEvents' and audit_event_type_s == 'SQL_BATCH_COMPLETED' | project TimeGenerated, server_instance_name_s, database_name_s, client_ip_s, application_name_s, command_s, username_s | sort by TimeGenerated desc | limit 10"
-#   query_type          = "Result"
-#   result_format       = "Table"
-#   workspace_name      = azurerm_log_analytics_workspace.example.name
-# }
-
 # アクショングループを作成するためのコード
 resource "azurerm_monitor_action_group" "example" {
   name                = "example-action-group"
@@ -33,25 +23,28 @@ resource "azurerm_monitor_action_group" "example" {
   }
 }
 
-# アラートルールを作成するためのコード
-resource "azurerm_monitor_metric_alert" "example" {
-  name                = "example-metric-alert"
+# sqlアラートルールを作成するためのコード
+resource "azurerm_monitor_metric_alert" "sql_memory_alert" {
+  name                = "sql-memory-alert"
   resource_group_name = azurerm_resource_group.example.name
   scopes              = [azurerm_sql_database.example.id]
-  description         = "Example Metric Alert Rule"
+  description         = "This alert will trigger when the memory usage percentage is greater than a certain threshold."
+
   criteria {
     metric_namespace = "Microsoft.Sql/servers/databases"
-    metric_name      = "successful_sql_auto_tuning_actions"
-    aggregation      = "Total"
+    metric_name      = "buffer_pool_percent" # バッファプールのメモリ使用率のメトリック
+    aggregation      = "Average"
     operator         = "GreaterThan"
-    threshold        = 1
-    time_grain       = "PT5M"
+    threshold        = 80 # 閾値を設定します（この例では80%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
     dimension {
-      name     = "database_name"
+      name     = "DatabaseName"
       operator = "Include"
-      values   = ["example_database"]
+      values   = ["example-sql-database"]
     }
   }
+
   action {
     action_group_id = azurerm_monitor_action_group.example.id
   }
