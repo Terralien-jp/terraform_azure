@@ -56,3 +56,31 @@ resource "azurerm_monitor_metric_alert" "example" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+# redisのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert" "redis_cpu_alert" {
+  name                = "redis-cpu-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_redis_cache.example.id]
+  description         = "This alert will trigger when CPU usage percentage is greater than a certain threshold."
+
+  criteria {
+    metric_namespace = "Microsoft.Cache/Redis"
+    metric_name      = "cacheprocessorpercent" # CPU使用率のメトリック
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 75 # 閾値を設定します（この例では75%としています）
+
+    # 必要に応じて、次元フィルタリングを設定できます
+    dimension {
+      name     = "CacheName"
+      operator = "Include"
+      values   = ["example-redis-cache"]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
