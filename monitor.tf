@@ -97,6 +97,46 @@ resource "azurerm_monitor_metric_alert" "storage_usage_alert" {
   }
 }
 
+# CPU usage alert
+resource "azurerm_monitor_metric_alert" "cpu_usage_alert" {
+  name                = "example-cpu-usage-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_app_service_plan.example.id]
+  description         = "This alert will trigger when the CPU usage exceeds 80%."
+
+  criteria {
+    metric_namespace = "Microsoft.Web/serverfarms"
+    metric_name      = "CpuPercentage"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
+# Memory usage alert
+resource "azurerm_monitor_metric_alert" "memory_usage_alert" {
+  name                = "example-memory-usage-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_app_service_plan.example.id]
+  description         = "This alert will trigger when the memory usage exceeds 80%."
+
+  criteria {
+    metric_namespace = "Microsoft.Web/serverfarms"
+    metric_name      = "MemoryPercentage"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
 # SQL DB DTU使用率を監視するためのコード
 resource "azurerm_monitor_metric_alert" "sql_dtu_alert" {
   name                = "sql-dtu-alert"
