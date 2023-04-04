@@ -77,6 +77,26 @@ resource "azurerm_monitor_metric_alert" "sql_cpu_alert" {
   }
 }
 
+# Strage Accountの使用量を監視するためのコード
+resource "azurerm_monitor_metric_alert" "storage_usage_alert" {
+  name                = "example-storage-usage-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_storage_account.example.id]
+  description         = "This alert will trigger when the storage usage exceeds 80% of the capacity."
+
+  criteria {
+    metric_namespace = "Microsoft.Storage/storageAccounts"
+    metric_name      = "UsedCapacity"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 0.8 * 1024 * 1024 * 1024 * 1024  # 80% of 1 TiB in bytes
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
 # SQL DB DTU使用率を監視するためのコード
 resource "azurerm_monitor_metric_alert" "sql_dtu_alert" {
   name                = "sql-dtu-alert"
