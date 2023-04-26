@@ -267,3 +267,23 @@ resource "azurerm_monitor_metric_alert" "example" {
   action_group_id           = azurerm_monitor_action_group.example.id
   auto_mitigate             = true
 }
+
+# Function Appのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert" "example" {
+  name                = "example-metricalert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_function_app.example.id]
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "CpuPercentage"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
