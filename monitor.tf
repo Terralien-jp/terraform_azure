@@ -244,3 +244,26 @@ resource "azurerm_monitor_metric_alert" "redis_memory_alert" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+# App Serviceのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert" "example" {
+  name                = "example-metricalert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_app_service.example.id]
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "Http5xx"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 5
+  }
+
+  window_size               = "PT10M"
+  evaluation_frequency      = "PT1M"
+  target_resource_type      = "Microsoft.Web/sites"
+  target_resource_location  = azurerm_resource_group.example.location
+  action_group_id           = azurerm_monitor_action_group.example.id
+  auto_mitigate             = true
+}
