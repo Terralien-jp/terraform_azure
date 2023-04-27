@@ -287,3 +287,23 @@ resource "azurerm_monitor_metric_alert" "example" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+# Function Appのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert" "function_execution_units_alert" {
+  name                = "function-execution-units-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_function_app.example.id]
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "FunctionExecutionUnits"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 1000 # 1秒あたり1GB
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
