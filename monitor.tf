@@ -307,3 +307,41 @@ resource "azurerm_monitor_metric_alert" "function_execution_units_alert" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+# Function Appのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert" "functions_failed_alert" {
+  name                = "functions-failed-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_function_app.example.id]
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "FunctionsFailed"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 5 # しきい値は要件に応じて調整してください。
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
+
+resource "azurerm_monitor_metric_alert" "function_success_rate_alert" {
+  name                = "function-success-rate-alert"
+  resource_group_name = azurerm_resource_group.example.name
+  scopes              = [azurerm_function_app.example.id]
+
+  criteria {
+    metric_namespace = "Microsoft.Web/sites"
+    metric_name      = "FunctionSuccessRate"
+    aggregation      = "Average"
+    operator         = "LessThan"
+    threshold        = 95 # しきい値は要件に応じて調整してください。ここでは95%を例としています。
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+}
