@@ -345,3 +345,47 @@ resource "azurerm_monitor_metric_alert" "function_success_rate_alert" {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 }
+
+# Function Appのアラートルールを作成するためのコード
+
+resource "azurerm_monitor_metric_alert_v2" "example_alert" {
+  name                = "example_alert"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_function_app.example.location
+  target_resource_id  = azurerm_function_app.example.id
+
+  criteria {
+    query             = <<QUERY
+let totalExecutions = toscalar(
+    requests
+    | where timestamp > ago(5m)
+    | count
+);
+let successfulExecutions = toscalar(
+    requests
+    | where timestamp > ago(5m)
+    | where resultCode startswith "2"
+    | count
+);
+let successRate = successfulExecutions / totalExecutions * 100;
+let failureRate = 100 - successRate;
+failureRate < 1
+QUERY
+    time_aggregation  = "Count"
+    operator          = "GreaterThan"
+    threshold         = 0
+    dimension {
+      name           = "functionName"
+      operator       = "Include"
+      values         = [azurerm_function_app.example.name]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.example.id
+  }
+
+  tags = {
+    Environment = "Production"
+  }
+}
