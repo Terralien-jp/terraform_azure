@@ -348,14 +348,15 @@ resource "azurerm_monitor_metric_alert" "function_success_rate_alert" {
 
 # Function Appのアラートルールを作成するためのコード
 
-resource "azurerm_monitor_metric_alert_v2" "example_alert" {
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "example_alert" {
   name                = "example_alert"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_function_app.example.location
+  description         = "Azure Functions success rate below 99%"
   target_resource_id  = azurerm_function_app.example.id
 
-  criteria {
-    query             = <<QUERY
+  query {
+    query = <<QUERY
 let totalExecutions = toscalar(
     requests
     | where timestamp > ago(5m)
@@ -369,23 +370,31 @@ let successfulExecutions = toscalar(
 );
 let successRate = successfulExecutions / totalExecutions * 100;
 let failureRate = 100 - successRate;
-failureRate < 1
+failureRate > 1
 QUERY
-    time_aggregation  = "Count"
+    workspace_id   = azurerm_log_analytics_workspace.example.id
+    time_range {
+      from = "PT5M"
+    }
+  }
+
+  alert_criteria {
     operator          = "GreaterThan"
     threshold         = 0
-    dimension {
-      name           = "functionName"
-      operator       = "Include"
-      values         = [azurerm_function_app.example.name]
+    metric_namespace  = "microsoft.insights/components"
+    metric_name       = "success_rate"
+    dimensions {
+      name    = "function_name"
+      values  = [azurerm_function_app.example.name]
     }
+    time_aggregation  = "Average"
+    frequency         = "PT5M"
+    time_grain        = "PT1M"
   }
 
   action {
     action_group_id = azurerm_monitor_action_group.example.id
   }
 
-  tags = {
-    Environment = "Production"
-  }
+  severity    = 2
 }
