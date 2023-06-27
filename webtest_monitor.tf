@@ -17,11 +17,11 @@ resource "azurerm_monitor_metric_alert" "example" {
   severity            = 4
   frequency           = "PT1M"
   window_size         = "PT5M"
-  target_resource_type = "microsoft.insights/webtests"
+  target_resource_type = "Microsoft.Insights/webtests"
 
   criteria {
     metric_namespace = "microsoft.insights/webtests"
-    metric_name      = "synthetictransaction/availability"
+    metric_name      = "syntheticmonitoravailability"
     aggregation      = "Average"
     operator         = "Equals"
     threshold        = 1
